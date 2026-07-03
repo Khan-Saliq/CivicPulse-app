@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, Camera, MapPin, X, Loader } from 'lucide-react'
+import { AlertCircle, Camera, MapPin, Loader } from 'lucide-react'
 import { Layout } from '../../components/layout/Layout'
 import { AnimatedPage } from '../../components/ui/AnimatedPage'
 import { useAuth } from '../../context/AuthContext'
