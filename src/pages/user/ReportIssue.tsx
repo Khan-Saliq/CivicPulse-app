@@ -38,6 +38,7 @@ export function ReportIssue() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (geo.lat != null && geo.lng != null) {
@@ -122,30 +123,9 @@ export function ReportIssue() {
   }
 
   const triggerImageInput = () => {
-    // Check if device has camera (mobile/tablet)
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-    
-    if (isMobile) {
-      // On mobile, trigger file input with camera
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = 'image/*'
-      input.setAttribute('capture', 'environment')
-      input.onchange = (e) => {
-        const event = e as unknown as React.ChangeEvent<HTMLInputElement>
-        handleImage(event)
-      }
-      input.click()
-    } else {
-      // On desktop, show file picker
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = 'image/*'
-      input.onchange = (e) => {
-        const event = e as unknown as React.ChangeEvent<HTMLInputElement>
-        handleImage(event)
-      }
-      input.click()
+    // Trigger the hidden camera input
+    if (cameraInputRef.current) {
+      cameraInputRef.current.click()
     }
   }
 
@@ -346,6 +326,15 @@ export function ReportIssue() {
                     className="flex-1 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-1.5 file:text-cyan-300"
                   />
                 </div>
+                {/* Hidden camera input for mobile */}
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleImage}
+                  className="hidden"
+                />
                 {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 h-32 animate-scale-in rounded-xl object-cover ring-2 ring-cyan-500/30" />}
               </div>
             </div>
