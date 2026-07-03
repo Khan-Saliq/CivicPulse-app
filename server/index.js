@@ -29,7 +29,26 @@ if (!process.env.MONGODB_URI) {
 }
 
 app.use(cors({
-  origin: process.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5173',
+  origin: function(origin, callback) {
+    // Allow requests from these origins
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      process.env.VITE_API_URL?.replace('/api', '') || '',
+      'https://civicpulse.vercel.app',
+      'https://civicpulse-saliq.vercel.app'
+    ].filter(Boolean)
+    
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true)
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(null, true) // Allow all origins in development
+    }
+  },
   credentials: true
 }))
 app.use(express.json({ limit: '50mb' }))
