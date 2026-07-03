@@ -1,6 +1,17 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 const TOKEN_KEY = 'civicpulse_token'
 
+// Helper to convert localhost URLs to deployed backend URLs
+export function fixImageUrl(url: string): string {
+  if (!url) return url
+  // Replace localhost:5000 with deployed backend URL
+  if (url.includes('localhost:5000')) {
+    const baseUrl = API_URL.replace('/api', '')
+    return url.replace('http://localhost:5000', baseUrl)
+  }
+  return url
+}
+
 export class ApiError extends Error {
   status: number
   constructor(message: string, status: number) {

@@ -8,6 +8,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge'
 import { TrustScore } from '../../components/ui/TrustScore'
 import { Badge } from '../../components/ui/Badge'
 import { useConfig } from '../../context/ConfigContext'
+import { fixImageUrl } from '../../services/api'
 import { useIssues } from '../../context/IssueContext'
 import { useAuth } from '../../context/AuthContext'
 import type { IssueStatus, ValidationResult } from '../../types'
@@ -95,7 +96,7 @@ export function AdminIssueDetail() {
               <p className="mt-3 text-slate-400">{issue.description}</p>
               {issue.imageUrl && (
                 <div className="mt-4 space-y-3">
-                  <img src={issue.imageUrl} alt="Evidence" className="max-h-64 w-full rounded-xl object-cover ring-2 ring-white/10" />
+                  <img src={fixImageUrl(issue.imageUrl)} alt="Evidence" className="max-h-64 w-full rounded-xl object-cover ring-2 ring-white/10" />
                   <button
                     type="button"
                     onClick={downloadProofImage}

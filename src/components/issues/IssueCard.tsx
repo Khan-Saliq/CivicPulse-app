@@ -5,6 +5,7 @@ import { StatusBadge } from '../ui/StatusBadge'
 import { PriorityBar } from '../ui/PriorityBar'
 import { Badge } from '../ui/Badge'
 import { useConfig } from '../../context/ConfigContext'
+import { fixImageUrl } from '../../services/api'
 
 const validationVariant: Record<string, 'green' | 'amber' | 'red' | 'default'> = {
   valid: 'green',
@@ -48,7 +49,7 @@ export function IssueCard({
         </div>
         {issue.imageUrl && (
           <img
-            src={issue.imageUrl}
+            src={fixImageUrl(issue.imageUrl)}
             alt=""
             className="h-16 w-16 rounded-xl object-cover ring-2 ring-white/10 transition-transform duration-300 group-hover:scale-105 group-hover:ring-cyan-500/30"
           />
