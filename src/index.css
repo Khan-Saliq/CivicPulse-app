@@ -48,6 +48,61 @@ body {
   to { opacity: 1; }
 }
 
+@keyframes scan-line {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(34, 211, 238, 0.5), 0 0 10px rgba(34, 211, 238, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.8), 0 0 30px rgba(34, 211, 238, 0.5);
+  }
+}
+
+.scanning-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanning-container::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #22d3ee, transparent);
+  animation: scan-line 2s linear infinite;
+  z-index: 10;
+  box-shadow: 0 0 10px #22d3ee, 0 0 20px #22d3ee;
+}
+
+.scanning-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, 
+    rgba(34, 211, 238, 0.1) 0%, 
+    transparent 50%, 
+    rgba(34, 211, 238, 0.1) 100%);
+  animation: pulse-glow 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
 @keyframes slide-in-right {
   from {
     opacity: 0;

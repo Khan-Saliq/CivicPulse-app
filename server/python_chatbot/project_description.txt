@@ -1,0 +1,246 @@
+Dynamic Civic Issue Prioritization System
+
+Introduction:
+
+Civic issues such as road damage, waste mismanagement, water supply disruptions, electricity failures, and sanitation problems are common across urban, semi-urban, and rural regions. With rapid population growth and urbanization, these issues are increasing in both frequency and severity.
+
+Although several digital platforms allow citizens to report problems, they lack intelligent mechanisms to manage and prioritize them effectively. Most systems operate on a first-come-first-serve basis or depend heavily on manual intervention, resulting in delayed responses and inefficient use of resources.
+
+The Dynamic Civic Issue Prioritization System is designed to overcome these limitations. It is a web-based platform that not only collects complaints but also intelligently analyzes and prioritizes them using multiple parameters such as severity, number of reports, location density, and user reliability.
+
+Problem Statement:
+
+There is no unified, intelligent system that can efficiently collect, analyze, and prioritize civic issues across different regions to ensure timely resolution.
+
+Key Challenges:
+
+- Lack of intelligent prioritization of complaints
+- Duplicate reporting of the same issue
+- Absence of data-driven insights for authorities
+- Poor transparency in issue handling
+- Presence of unreliable or false reports
+
+Objectives:
+
+- To design a centralized platform for reporting civic issues
+- To reduce duplicate complaints using clustering techniques
+- To implement a dynamic priority scoring system
+- To improve decision-making using data analytics
+- To ensure data reliability using a trust score mechanism
+- To enhance user experience through an AI assistant
+
+Proposed Solution:
+
+The system is a web-based platform that allows users to report streetlight failure issues and enables authorities to manage them efficiently.
+
+Working Process:
+
+- Users submit streetlight failure issues with location and image proof
+- System validates and processes data
+- Duplicate streetlight reports are detected and merged
+- Priority score is calculated dynamically
+- Issues are visualized using heatmaps
+- AI chatbot assists in validation and insights
+- Admin reviews and takes action
+
+System Architecture:
+
+Frontend
+
+- User and admin interface
+- Issue reporting and tracking
+- Map-based visualization
+
+Backend
+
+Handles:
+- Business logic
+- Priority calculation
+- Clustering algorithms
+- Trust score updates
+- AI validation processing
+
+Database
+
+Stores:
+- Users
+- Issues
+- Locations
+- Votes
+- Trust scores
+
+Key Features:
+
+6.1 User Module
+
+- Registration and login
+- Submit issues with images
+- View nearby issues
+- Track status
+
+6.2 Admin Module
+
+- View prioritized issues
+- Assign tasks
+- Update issue status
+- Use AI chatbot for validation
+
+6.3 Issue Management Module
+
+- Handles issue lifecycle
+- Performs clustering and updates
+
+6.4 Priority Engine
+
+- Calculates and updates priority scores dynamically
+
+6.5 Trust Management Module
+
+- Maintains user trust scores
+- Updates scores based on AI validation results
+
+6.6 AI Validation Module
+
+- Processes uploaded images
+- Performs morph detection
+- Sends validation result to system
+- Triggers trust score and priority updates
+
+6.7 Visualization Module
+
+- Displays heatmaps
+- Shows clustered issues
+
+6.8 Chatbot Module
+
+- Handles user queries
+- Assists admin in validation
+- Provides system insights
+
+Key Features:
+
+7.1 Smart Heatmap and Problem Clustering
+
+- Displays issues based on geographical intensity
+- Identifies high-risk zones
+- Helps in efficient resource allocation
+
+7.2 Dynamic Priority Scoring System
+
+Issues are ranked based on:
+- Severity level
+- Number of reports
+- Time delay
+- Area impact
+- User trust score
+
+Ensures critical issues are handled first.
+
+7.3 Trust Score System
+
+Formula: Trust Score = Verified Reports / Total Reports
+
+Score Increases When:
+- Reports are verified
+- Valid evidence is provided
+
+Score Decreases When:
+- Reports are false
+- Evidence is manipulated
+
+7.4 AI Chatbot for Morph Detection
+
+Working:
+- Admin submits report images or files to the chatbot
+- Chatbot performs image authenticity analysis (morph detection)
+- Classification:
+  - Valid
+  - Suspicious
+  - Manipulated
+
+System Actions:
+- If image is valid → Trust score increases
+- If image is manipulated → Trust score decreases
+- Issue priority score adjusted
+- Admin notified
+
+Output:
+- Verified result returned to admin
+- Trust score and priority updated automatically
+
+Benefits:
+- Reduces fake or misleading reports
+- Improves system reliability
+- Enables automated validation
+
+7.5 AI Chatbot Assistant
+
+- Guides users during issue reporting
+- Suggests existing issues
+- Provides insights such as:
+  - Critical areas
+  - Common issues
+
+7.6 Duplicate Issue Handling
+
+- Detects similar complaints
+- Groups them into one issue
+- Uses voting mechanism
+
+7.7 Real-Time Status Tracking
+
+Users can track issue progress:
+- Reported
+- In Progress
+- Resolved
+
+Priority Calculation:
+
+Priority Score (P) = (W1 × Severity) + (W2 × Number of Reports) + (W3 × Time Delay) + (W4 × Cluster Density) + (W5 × Trust Score)
+
+Update with AI Validation
+- If morph detected → Trust Score decreases
+- Reduced trust lowers priority contribution
+- Ensures unreliable issues are deprioritized
+
+Workflow
+
+- User submits issue
+- System checks for duplicates
+- Issue created
+- Priority calculated
+- Admin reviews issue
+- Admin sends image to AI chatbot
+- Chatbot performs morph detection
+- Trust score updated
+- Priority recalculated
+- Admin proceeds with action
+
+Advantages:
+
+- Intelligent prioritization
+- Reduced duplicate complaints
+- Improved transparency
+- Automated validation of evidence
+- Higher data reliability
+- Better decision-making
+
+Limitations:
+
+- Requires internet connectivity
+- AI validation may not be 100% accurate
+- Depends on quality of uploaded images
+
+Future Scope:
+
+- Advanced AI-based image forensics
+- Real-time automated validation
+- Mobile application integration
+- Predictive analytics for issue forecasting
+- Integration with smart city infrastructure
+
+Conclusion:
+
+The system provides an intelligent and scalable solution for civic issue management by integrating prioritization, clustering, trust evaluation, and AI-based validation.
+
+The addition of morph detection ensures that decisions are based on reliable and verified data, improving both efficiency and trust in the system.

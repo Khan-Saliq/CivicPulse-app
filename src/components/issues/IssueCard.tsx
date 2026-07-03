@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
 import { MapPin, Users } from 'lucide-react'
-import { CATEGORY_LABELS, type Issue } from '../../types'
+import type { Issue } from '../../types'
 import { StatusBadge } from '../ui/StatusBadge'
 import { PriorityBar } from '../ui/PriorityBar'
 import { Badge } from '../ui/Badge'
+import { useConfig } from '../../context/ConfigContext'
 
 const validationVariant: Record<string, 'green' | 'amber' | 'red' | 'default'> = {
   valid: 'green',
@@ -21,6 +22,9 @@ export function IssueCard({
   adminLink?: boolean
   delay?: number
 }) {
+  const { config } = useConfig()
+  const categoryLabel =
+    config?.categories.find((c) => c.id === issue.category)?.label ?? issue.category
   const to = adminLink ? `/admin/issues/${issue.id}` : `/my-issues#${issue.id}`
 
   return (
@@ -32,7 +36,7 @@ export function IssueCard({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="teal">{CATEGORY_LABELS[issue.category]}</Badge>
+            <Badge variant="teal">{categoryLabel}</Badge>
             <StatusBadge status={issue.status} />
             <Badge variant={validationVariant[issue.validationResult]}>
               {issue.validationResult}
@@ -58,10 +62,17 @@ export function IssueCard({
         <span className="truncate">{issue.location.address}</span>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-1 text-sm text-slate-500">
-          <Users className="h-4 w-4 text-cyan-400" />
-          {issue.reportCount} reports
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1 text-sm text-slate-500">
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4 text-cyan-400" />
+            {issue.reportCount} reports
+          </div>
+          {issue.responsibleDepartment && (
+            <div className="text-xs text-slate-500">
+              Dept: <span className="text-cyan-300">{issue.responsibleDepartment}</span>
+            </div>
+          )}
         </div>
         <div className="w-32">
           <PriorityBar score={issue.priorityScore} />

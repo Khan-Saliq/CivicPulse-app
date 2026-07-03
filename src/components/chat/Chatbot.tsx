@@ -1,41 +1,95 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bot, Send, Sparkles } from 'lucide-react'
-import { createMessage, getUserChatResponse } from '../../services/chatService'
-import type { ChatMessage, Issue } from '../../types'
+import { createMessage, getChatGreeting, sendCitizenMessage } from '../../services/chatService'
+import type { ChatMessage } from '../../types'
+import { useConfig } from '../../context/ConfigContext'
 
-interface ChatbotProps {
-  issues: Issue[]
-  suggestions: string[]
-  title?: string
-  placeholder?: string
-}
-
-export function Chatbot({
-  issues,
-  suggestions,
-  title = 'AI Assistant',
-  placeholder = 'Ask about reporting, priorities, trust scores...',
-}: ChatbotProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    createMessage(
-      'assistant',
-      'Hello! I\'m your CivicSync assistant. I can guide you through reporting, suggest existing issues, and share insights about critical areas.'
-    ),
-  ])
+export function Chatbot({ title = 'AI Assistant', placeholder = 'Ask about reporting, priorities, trust scores...' }) {
+  const { config } = useConfig()
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sessionId, setSessionId] = useState<string | undefined>()
   const bottomRef = useRef<HTMLDivElement>(null)
+  const typingTimerRef = useRef<number | null>(null)
+
+  const suggestions = config?.chatSuggestions.citizen ?? []
+
+  useEffect(() => {
+    getChatGreeting('citizen')
+      .then((greeting) => setMessages([createMessage('assistant', greeting)]))
+      .catch(() =>
+        setMessages([
+          createMessage('assistant', 'Hello! Ask me about reporting issues or priority areas.'),
+        ])
+      )
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const send = (text: string) => {
-    if (!text.trim()) return
+  useEffect(() => {
+    return () => {
+      if (typingTimerRef.current) {
+        window.clearInterval(typingTimerRef.current)
+      }
+    }
+  }, [])
+
+  const animateAssistantResponse = (messageId: string, content: string) => {
+    if (typingTimerRef.current) {
+      window.clearInterval(typingTimerRef.current)
+    }
+
+    const words = content.split(' ')
+    let index = 0
+
+    setMessages((current) =>
+      current.map((msg) => (msg.id === messageId ? { ...msg, content: '...' } : msg))
+    )
+
+    typingTimerRef.current = window.setInterval(() => {
+      index += 1
+      setMessages((current) =>
+        current.map((msg) =>
+          msg.id === messageId ? { ...msg, content: words.slice(0, index).join(' ') } : msg
+        )
+      )
+
+      if (index >= words.length) {
+        if (typingTimerRef.current) {
+          window.clearInterval(typingTimerRef.current)
+          typingTimerRef.current = null
+        }
+      }
+    }, 35)
+  }
+
+  const send = async (text: string) => {
+    if (!text.trim() || sending) return
     const userMsg = createMessage('user', text.trim())
-    const reply = getUserChatResponse(text, issues)
-    const assistantMsg = createMessage('assistant', reply)
+    const assistantMsg = createMessage('assistant', '')
+
     setMessages((m) => [...m, userMsg, assistantMsg])
     setInput('')
+    setSending(true)
+
+    try {
+      const response = await sendCitizenMessage(text, sessionId)
+      setSessionId(response.sessionId)
+      animateAssistantResponse(assistantMsg.id, response.content)
+    } catch {
+      setMessages((m) =>
+        m.map((msg) =>
+          msg.id === assistantMsg.id
+            ? { ...msg, content: 'Sorry, I could not reach the server. Please try again.' }
+            : msg
+        )
+      )
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -46,7 +100,7 @@ export function Chatbot({
         </div>
         <div>
           <h3 className="font-semibold text-slate-100">{title}</h3>
-          <p className="text-xs text-slate-500">Powered by AI (demo mode)</p>
+          <p className="text-xs text-slate-500">CivicPulse AI Assistant</p>
         </div>
       </div>
 
@@ -76,7 +130,8 @@ export function Chatbot({
             <button
               key={s}
               onClick={() => send(s)}
-              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-400 transition-all duration-300 hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-300"
+              disabled={sending}
+              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-400 transition-all duration-300 hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-300 disabled:opacity-50"
             >
               <Sparkles className="h-3 w-3" />
               {s}
@@ -94,12 +149,10 @@ export function Chatbot({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={placeholder}
-            className="input-dark flex-1 text-sm"
+            disabled={sending}
+            className="input-dark flex-1 text-sm disabled:opacity-50"
           />
-          <button
-            type="submit"
-            className="btn-primary rounded-xl p-2.5"
-          >
+          <button type="submit" disabled={sending} className="btn-primary rounded-xl p-2.5 disabled:opacity-50">
             <Send className="h-4 w-4" />
           </button>
         </form>

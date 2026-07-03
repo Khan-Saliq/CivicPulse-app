@@ -1,4 +1,5 @@
-import { STATUS_LABELS, type IssueStatus } from '../../types'
+import { useConfig } from '../../context/ConfigContext'
+import type { IssueStatus } from '../../types'
 import { Badge } from './Badge'
 
 const statusVariant: Record<IssueStatus, 'amber' | 'blue' | 'green'> = {
@@ -8,5 +9,7 @@ const statusVariant: Record<IssueStatus, 'amber' | 'blue' | 'green'> = {
 }
 
 export function StatusBadge({ status }: { status: IssueStatus }) {
-  return <Badge variant={statusVariant[status]}>{STATUS_LABELS[status]}</Badge>
+  const { config } = useConfig()
+  const label = config?.statuses.find((s) => s.id === status)?.label ?? status
+  return <Badge variant={statusVariant[status]}>{label}</Badge>
 }

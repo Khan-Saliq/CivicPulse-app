@@ -1,69 +1,49 @@
-import { DEMO_USERS } from '../data/mockData'
-import { loadFromStorage, saveToStorage } from './storage'
+import { apiFetch, setToken } from './api'
 import type { User } from '../types'
 
-const SESSION_KEY = 'session'
-const USERS_KEY = 'users'
-
-function getUsers(): User[] {
-  return loadFromStorage(USERS_KEY, DEMO_USERS)
-}
-
-export function login(email: string, password: string): User | null {
-  const user = getUsers().find(
-    (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+export async function login(email: string, password: string): Promise<Omit<User, 'password'>> {
+  const { user, token } = await apiFetch<{ user: Omit<User, 'password'>; token: string }>(
+    '/auth/login',
+    { method: 'POST', body: JSON.stringify({ email, password }) }
   )
-  if (!user) return null
-  const { password: _, ...safe } = user
-  saveToStorage(SESSION_KEY, safe)
+  setToken(token)
   return user
 }
 
-export function register(data: {
+export async function register(data: {
   name: string
   email: string
   password: string
-}): User {
-  const users = getUsers()
-  if (users.some((u) => u.email.toLowerCase() === data.email.toLowerCase())) {
-    throw new Error('Email already registered')
-  }
-  const newUser: User = {
-    id: `u${Date.now()}`,
-    name: data.name,
-    email: data.email,
-    role: 'citizen',
-    trustScore: 50,
-    verifiedReports: 0,
-    totalReports: 0,
-    password: data.password,
-  }
-  users.push(newUser)
-  saveToStorage(USERS_KEY, users)
-  const { password: _, ...safe } = newUser
-  saveToStorage(SESSION_KEY, safe)
-  return newUser
+}): Promise<Omit<User, 'password'>> {
+  const { user, token } = await apiFetch<{ user: Omit<User, 'password'>; token: string }>(
+    '/auth/register',
+    { method: 'POST', body: JSON.stringify(data) }
+  )
+  setToken(token)
+  return user
 }
 
-export function getSession(): Omit<User, 'password'> | null {
-  return loadFromStorage<Omit<User, 'password'> | null>(SESSION_KEY, null)
+export async function fetchMe(): Promise<Omit<User, 'password'> | null> {
+  try {
+    const { user } = await apiFetch<{ user: Omit<User, 'password'> }>('/auth/me')
+    return user
+  } catch {
+    return null
+  }
 }
 
 export function logout(): void {
-  localStorage.removeItem('civicsync_' + SESSION_KEY)
+  setToken(null)
 }
 
-export function updateUserTrust(userId: string, delta: number): void {
-  const users = getUsers()
-  const idx = users.findIndex((u) => u.id === userId)
-  if (idx === -1) return
-  users[idx].trustScore = Math.max(0, Math.min(100, users[idx].trustScore + delta))
-  if (delta > 0) users[idx].verifiedReports += 1
-  users[idx].totalReports = Math.max(users[idx].totalReports, users[idx].verifiedReports)
-  saveToStorage(USERS_KEY, users)
-  const session = getSession()
-  if (session?.id === userId) {
-    const { password: _, ...safe } = users[idx]
-    saveToStorage(SESSION_KEY, safe)
-  }
+export async function validateSession(): Promise<Omit<User, 'password'> | null> {
+  return fetchMe()
+}
+
+export async function promoteToAdmin(email: string, role: 'admin' | 'department_admin', department?: string): Promise<Omit<User, 'password'>> {
+  const { user } = await apiFetch<{ user: Omit<User, 'password'> }>('/auth/promote', {
+    method: 'POST',
+    body: JSON.stringify({ email, role, department }),
+  })
+  return user
 }

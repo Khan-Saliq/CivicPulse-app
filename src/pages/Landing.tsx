@@ -68,7 +68,7 @@ export function Landing() {
               <span className="text-gradient">faster resolution</span>
             </h1>
             <p className="animate-fade-in-up stagger-2 mt-4 text-lg text-slate-400">
-              CivicSync collects complaints, detects duplicates, prioritizes issues intelligently,
+              CivicPulse collects complaints, detects duplicates, prioritizes issues intelligently,
               and validates evidence with AI — so authorities act on what matters most.
             </p>
             <div className="animate-fade-in-up stagger-3 mt-8 flex flex-wrap gap-3">
@@ -80,9 +80,9 @@ export function Landing() {
                 Sign In
               </Link>
             </div>
-            <p className="animate-fade-in-up stagger-4 mt-6 text-sm text-slate-500">
-              Demo: citizen@demo.com / admin@demo.com — password: demo123
-            </p>
+          <p className="animate-fade-in-up stagger-4 mt-6 text-sm text-slate-500">
+            Sign in or register to start reporting civic issues in your area.
+          </p>
           </div>
         </section>
 

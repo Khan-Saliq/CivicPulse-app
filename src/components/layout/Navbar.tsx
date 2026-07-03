@@ -1,7 +1,8 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { LogOut, MapPin, Menu, Shield, X } from 'lucide-react'
-import { useState } from 'react'
+import { Bell, LogOut, MapPin, Menu, Shield, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { getAdminNotifications, getUserNotifications } from '../../services/notificationService'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300 ${
@@ -14,6 +15,29 @@ export function Navbar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadNotifications(0)
+      return
+    }
+
+    const loadNotifications = async () => {
+      try {
+        const notifications = user.role === 'admin'
+          ? await getAdminNotifications()
+          : await getUserNotifications()
+        setUnreadNotifications(notifications.filter((notification) => !notification.read).length)
+      } catch {
+        setUnreadNotifications(0)
+      }
+    }
+
+    loadNotifications()
+    const interval = window.setInterval(loadNotifications, 30000)
+    return () => window.clearInterval(interval)
+  }, [user])
 
   const handleLogout = () => {
     logout()
@@ -25,7 +49,10 @@ export function Navbar() {
     { to: '/dashboard', label: 'Dashboard' },
     { to: '/report', label: 'Report Issue' },
     { to: '/my-issues', label: 'My Issues' },
+    { to: '/notifications', label: 'Notifications' },
     { to: '/nearby', label: 'Nearby' },
+    { to: '/uploads', label: 'Uploads' },
+    { to: '/chat-history', label: 'Chat History' },
     { to: '/heatmap', label: 'Heatmap' },
   ]
 
@@ -33,23 +60,26 @@ export function Navbar() {
     { to: '/admin', label: 'Dashboard' },
     { to: '/admin/issues', label: 'Issues' },
     { to: '/admin/validation', label: 'AI Validation' },
+    { to: '/admin/notifications', label: 'Notifications' },
+    { to: '/uploads', label: 'Uploads' },
+    { to: '/chat-history', label: 'Chat History' },
     { to: '/heatmap', label: 'Heatmap' },
   ]
 
-  const links = user?.role === 'admin' ? adminLinks : citizenLinks
+  const links = user?.role !== 'citizen' ? adminLinks : citizenLinks
 
   return (
     <header className="glass-nav sticky top-0 z-50">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Link
-          to={user ? (user.role === 'admin' ? '/admin' : '/dashboard') : '/'}
+          to={user ? (user.role !== 'citizen' ? '/admin' : '/dashboard') : '/'}
           className="group flex items-center gap-2 transition-transform duration-300 hover:scale-105"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-cyan-500/25 transition-shadow group-hover:shadow-cyan-500/40">
             <MapPin className="h-5 w-5 text-white" />
           </div>
           <span className="text-lg font-bold text-slate-100">
-            Civic<span className="text-gradient">Sync</span>
+            Civic<span className="text-gradient">Pulse</span>
           </span>
         </Link>
 
@@ -65,12 +95,26 @@ export function Navbar() {
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
             <>
+              <button
+                onClick={() => navigate(user?.role !== 'citizen' ? '/admin/notifications' : '/notifications')}
+                className="relative rounded-xl p-2 text-slate-200 transition hover:bg-white/5"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadNotifications > 0 && (
+                  <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[0.65rem] font-semibold text-white">
+                    {unreadNotifications}
+                  </span>
+                )}
+              </button>
               <div className="text-right">
                 <p className="text-sm font-medium text-slate-100">{user.name}</p>
                 <p className="flex items-center justify-end gap-1 text-xs text-slate-500">
                   <Shield className="h-3 w-3 text-violet-400" />
-                  {user.role === 'admin' ? (
-                    <span className="text-violet-400">Administrator</span>
+                  {user.role !== 'citizen' ? (
+                    <span className="text-violet-400">
+                      {user.role === 'admin' ? 'Administrator' : 'Department Admin'}
+                    </span>
                   ) : (
                     <>Trust: <span className="text-cyan-400">{user.trustScore}%</span></>
                   )}

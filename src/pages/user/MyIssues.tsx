@@ -1,12 +1,23 @@
+import { useEffect, useState } from 'react'
 import { Layout } from '../../components/layout/Layout'
 import { AnimatedPage } from '../../components/ui/AnimatedPage'
 import { IssueCard } from '../../components/issues/IssueCard'
 import { useAuth } from '../../context/AuthContext'
 import { getIssuesByReporter } from '../../services/issueService'
+import type { Issue } from '../../types'
 
 export function MyIssues() {
   const { user } = useAuth()
-  const issues = user ? getIssuesByReporter(user.id) : []
+  const [issues, setIssues] = useState<Issue[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user) return
+    getIssuesByReporter(user.id)
+      .then(setIssues)
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [user])
 
   return (
     <Layout>
@@ -16,7 +27,9 @@ export function MyIssues() {
         </h1>
         <p className="mt-1 text-slate-400">Track status and priority of your submitted reports.</p>
 
-        {issues.length === 0 ? (
+        {loading ? (
+          <p className="mt-8 text-slate-400">Loading your issues...</p>
+        ) : issues.length === 0 ? (
           <div className="glass-card mt-8 animate-scale-in p-12 text-center">
             <p className="text-slate-400">You haven&apos;t reported any issues yet.</p>
           </div>

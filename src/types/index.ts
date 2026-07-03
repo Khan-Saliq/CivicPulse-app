@@ -1,11 +1,17 @@
-export type UserRole = 'citizen' | 'admin'
+export type UserRole = 'citizen' | 'admin' | 'department_admin'
 
 export type IssueCategory =
-  | 'road_damage'
-  | 'waste'
-  | 'water'
-  | 'electricity'
-  | 'sanitation'
+  | 'potholes_and_road_damage'
+  | 'traffic_signal_malfunction'
+  | 'non_functional_streetlights'
+  | 'water_leakage'
+  | 'garbage_overflow'
+  | 'drainage_blockage'
+  | 'public_toilet_issue'
+  | 'tree_trimming'
+  | 'building_safety'
+  | 'streetlight_failure'
+  | 'other'
 
 export type IssueStatus = 'reported' | 'in_progress' | 'resolved'
 
@@ -16,10 +22,10 @@ export interface User {
   name: string
   email: string
   role: UserRole
+  department?: string | null
   trustScore: number
   verifiedReports: number
   totalReports: number
-  password: string
 }
 
 export interface Location {
@@ -45,9 +51,17 @@ export interface Issue {
   priorityScore: number
   validationResult: ValidationResult
   assignedTo?: string
+  responsibleDepartment: string
   createdAt: string
   updatedAt: string
   votes: number
+  timeline?: Array<{
+    action: string
+    timestamp: string
+    performedBy?: string
+    details?: string
+  }>
+  lastActionAt?: string
 }
 
 export interface ChatMessage {
@@ -55,7 +69,58 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: string
+  issueId?: string
   validationResult?: ValidationResult
+}
+
+export interface ChatHistoryItem {
+  id: string
+  role: 'citizen' | 'admin'
+  message: string
+  response: string
+  timestamp: string
+  issueId?: string
+  validationResult?: ValidationResult
+}
+
+export interface Upload {
+  id: string
+  filename: string
+  url: string
+  uploaderId: string
+  uploaderName: string
+  issueId?: string
+  createdAt: string
+}
+
+export interface AdminNotification {
+  id: string
+  adminId: string
+  issueId: string
+  type: 'inactive_30days' | 'scheduled_deletion'
+  title: string
+  message: string
+  read: boolean
+  createdAt: string
+  issue?: {
+    title: string
+    status: IssueStatus
+  }
+}
+
+export interface UserNotification {
+  id: string
+  userId: string
+  issueId: string
+  type: 'status_update' | 'validation_update'
+  title: string
+  message: string
+  read: boolean
+  createdAt: string
+  issue?: {
+    title: string
+    status: IssueStatus
+  }
 }
 
 export interface PriorityWeights {
@@ -64,18 +129,4 @@ export interface PriorityWeights {
   timeDelay: number
   clusterDensity: number
   trustScore: number
-}
-
-export const CATEGORY_LABELS: Record<IssueCategory, string> = {
-  road_damage: 'Road Damage',
-  waste: 'Waste Management',
-  water: 'Water Supply',
-  electricity: 'Electricity',
-  sanitation: 'Sanitation',
-}
-
-export const STATUS_LABELS: Record<IssueStatus, string> = {
-  reported: 'Reported',
-  in_progress: 'In Progress',
-  resolved: 'Resolved',
 }

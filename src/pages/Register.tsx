@@ -32,7 +32,7 @@ export function Register() {
         <h1 className="text-2xl font-bold text-slate-100">
           Create <span className="text-gradient">account</span>
         </h1>
-        <p className="mt-1 text-slate-400">Join CivicSync to report civic issues in your area.</p>
+        <p className="mt-1 text-slate-400">Join CivicPulse to report civic issues in your area.</p>
 
         <form onSubmit={handleSubmit} className="glass-card mt-8 space-y-4 p-6">
           {error && (
