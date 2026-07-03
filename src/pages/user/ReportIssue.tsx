@@ -32,12 +32,7 @@ export function ReportIssue() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
-  const [cameraActive, setCameraActive] = useState(false)
-  const [cameraError, setCameraError] = useState<string | null>(null)
   const [locationRefreshing, setLocationRefreshing] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -136,57 +131,6 @@ export function ReportIssue() {
       reader.onerror = reject
       reader.readAsDataURL(file)
     })
-
-  const startCamera = async () => {
-    setCameraError(null)
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-      })
-      streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        setCameraActive(true)
-      }
-    } catch (err) {
-      setCameraError((err as Error).message || 'Unable to access camera. Check permissions.')
-    }
-  }
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop())
-      streamRef.current = null
-    }
-    setCameraActive(false)
-  }
-
-  const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) return
-    const context = canvasRef.current.getContext('2d')
-    if (!context) return
-
-    canvasRef.current.width = videoRef.current.videoWidth
-    canvasRef.current.height = videoRef.current.videoHeight
-    context.drawImage(videoRef.current, 0, 0)
-
-    canvasRef.current.toBlob((blob) => {
-      if (blob) {
-        const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' })
-        setImageFile(file)
-        setImagePreview(canvasRef.current?.toDataURL('image/jpeg') || '')
-        stopCamera()
-      }
-    }, 'image/jpeg', 0.9)
-  }
-
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop())
-      }
-    }
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -338,7 +282,6 @@ export function ReportIssue() {
                 {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 h-32 animate-scale-in rounded-xl object-cover ring-2 ring-cyan-500/30" />}
               </div>
             </div>
-            <canvas ref={canvasRef} className="hidden" />
             <button type="submit" disabled={submitting || lat == null || lng == null} className="btn-primary w-full py-3 disabled:opacity-60">
               {submitting ? 'Submitting...' : 'Submit Issue'}
             </button>
