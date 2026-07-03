@@ -121,6 +121,34 @@ export function ReportIssue() {
     }
   }
 
+  const triggerImageInput = () => {
+    // Check if device has camera (mobile/tablet)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    
+    if (isMobile) {
+      // On mobile, trigger file input with camera
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.setAttribute('capture', 'environment')
+      input.onchange = (e) => {
+        const event = e as unknown as React.ChangeEvent<HTMLInputElement>
+        handleImage(event)
+      }
+      input.click()
+    } else {
+      // On desktop, show file picker
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.onchange = (e) => {
+        const event = e as unknown as React.ChangeEvent<HTMLInputElement>
+        handleImage(event)
+      }
+      input.click()
+    }
+  }
+
   const fileToBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -302,54 +330,24 @@ export function ReportIssue() {
               <label className="mb-1 flex items-center gap-1 text-sm font-medium text-slate-400">
                 <Camera className="h-4 w-4 text-cyan-400" /> Image Proof
               </label>
-              {cameraActive ? (
-                <div className="space-y-3">
-                  <div className="relative overflow-hidden rounded-xl bg-black">
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={capturePhoto}
-                      className="flex-1 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-600"
-                    >
-                      Capture Photo
-                    </button>
-                    <button
-                      type="button"
-                      onClick={stopCamera}
-                      className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-400 transition hover:text-red-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                  {cameraError && <p className="text-sm text-red-300">{cameraError}</p>}
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={triggerImageInput}
+                    className="flex-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-300 transition hover:bg-cyan-500/15"
+                  >
+                    📷 Take Photo
+                  </button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImage}
+                    className="flex-1 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-1.5 file:text-cyan-300"
+                  />
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={startCamera}
-                      className="flex-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-300 transition hover:bg-cyan-500/15"
-                    >
-                      📷 Take Photo
-                    </button>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImage}
-                      className="flex-1 text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-1.5 file:text-cyan-300"
-                    />
-                  </div>
-                  {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 h-32 animate-scale-in rounded-xl object-cover ring-2 ring-cyan-500/30" />}
-                </div>
-              )}
+                {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 h-32 animate-scale-in rounded-xl object-cover ring-2 ring-cyan-500/30" />}
+              </div>
             </div>
             <canvas ref={canvasRef} className="hidden" />
             <button type="submit" disabled={submitting || lat == null || lng == null} className="btn-primary w-full py-3 disabled:opacity-60">
