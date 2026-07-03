@@ -11,6 +11,8 @@ import { findDuplicateCandidates } from '../../services/issueService'
 import { uploadImage } from '../../services/uploadService'
 import type { Issue, IssueCategory } from '../../types'
 
+// Report Issue Page - Citizen complaint submission with photo capture
+
 export function ReportIssue() {
   const { user } = useAuth()
   const { config } = useConfig()
