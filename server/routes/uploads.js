@@ -74,6 +74,7 @@ router.post('/image', authRequired, async (req, res) => {
     const name = `${Date.now()}-${filename || 'upload'}.${ext}`.replace(/[^a-zA-Z0-9._-]/g, '')
     
     // Upload to Cloudinary
+    console.log('Uploading to Cloudinary...')
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -82,14 +83,20 @@ router.post('/image', authRequired, async (req, res) => {
           resource_type: 'image',
         },
         (error, result) => {
-          if (error) reject(error)
-          else resolve(result)
+          if (error) {
+            console.error('Cloudinary upload error:', error)
+            reject(error)
+          } else {
+            console.log('Cloudinary upload successful:', result.secure_url)
+            resolve(result)
+          }
         }
       )
       uploadStream.end(buffer)
     })
 
     const url = result.secure_url
+    console.log('Image URL:', url)
 
     await Upload.create({
       filename: name,
