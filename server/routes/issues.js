@@ -251,7 +251,7 @@ router.get('/:id', authOptional, async (req, res) => {
 
 router.post('/', authRequired, async (req, res) => {
   try {
-    const { title, description, category, severity, location, imageUrl, mergeWithId } = req.body
+    const { title, description, category, severity, location, imageUrl, mergeWithId, area } = req.body
 
     if (!title || !description || !category || !severity || !location) {
       return res.status(400).json({ error: 'Missing required fields' })
@@ -327,6 +327,7 @@ router.post('/', authRequired, async (req, res) => {
       severity: sev,
       location: parsedLocation,
       geoLocation: { type: 'Point', coordinates: [parsedLocation.lng, parsedLocation.lat] },
+      area: area || 'Unknown Area',
       imageUrl,
       reporterId: reporter._id,
       reporterName: reporter.name,

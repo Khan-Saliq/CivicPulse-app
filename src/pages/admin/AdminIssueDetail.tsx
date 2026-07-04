@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, User } from 'lucide-react'
+import { ArrowLeft, User, MapPin } from 'lucide-react'
 import { Layout } from '../../components/layout/Layout'
 import { AnimatedPage } from '../../components/ui/AnimatedPage'
 import { PriorityBar } from '../../components/ui/PriorityBar'
@@ -108,6 +108,13 @@ export function AdminIssueDetail() {
                 </div>
               )}
               <div className="mt-4 text-sm text-slate-500 space-y-2">
+                {issue.area && (
+                  <p className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-cyan-400" />
+                    <span className="font-medium text-slate-300">Area:</span>
+                    <span className="text-cyan-300">{issue.area}</span>
+                  </p>
+                )}
                 <p>{issue.location.address}</p>
                 {issue.responsibleDepartment && (
                   <p>Responsible Department: <span className="text-cyan-300">{issue.responsibleDepartment}</span></p>

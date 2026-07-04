@@ -125,6 +125,7 @@ export async function createIssue(data: {
   category: IssueCategory
   severity: number
   location: Issue['location']
+  area?: string
   imageUrl?: string
   mergeWithId?: string
 }): Promise<Issue> {

@@ -9,6 +9,7 @@ import { useIssues } from '../../context/IssueContext'
 import { useGeolocation } from '../../hooks/useGeolocation'
 import { findDuplicateCandidates } from '../../services/issueService'
 import { uploadImage } from '../../services/uploadService'
+import { getAreaFromCoordinates } from '../../utils/geocoding'
 import type { Issue, IssueCategory } from '../../types'
 
 // Report Issue Page - Citizen complaint submission with photo capture
@@ -41,7 +42,12 @@ export function ReportIssue() {
     if (geo.lat != null && geo.lng != null) {
       setLat(geo.lat)
       setLng(geo.lng)
-      if (!address) setAddress(`${geo.lat.toFixed(4)}, ${geo.lng.toFixed(4)}`)
+      // Automatically fetch area name from coordinates
+      if (!address) {
+        getAreaFromCoordinates(geo.lat, geo.lng).then(area => {
+          setAddress(area)
+        })
+      }
     }
   }, [geo.lat, geo.lng])
 
@@ -158,6 +164,7 @@ export function ReportIssue() {
         category,
         severity,
         location: { lat: Number(lat), lng: Number(lng), address: address.trim() },
+        area: address.trim(),
         imageUrl,
         mergeWithId: mergeWithId || undefined,
       }

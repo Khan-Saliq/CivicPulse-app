@@ -7,6 +7,7 @@ import Upload from '../models/Upload.js'
 import Issue from '../models/Issue.js'
 import User from '../models/User.js'
 import ChatMessage from '../models/ChatMessage.js'
+import cloudinary from '../config/cloudinary.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const uploadsDir = path.join(__dirname, '..', 'uploads')
@@ -71,12 +72,24 @@ router.post('/image', authRequired, async (req, res) => {
     const ext = match[1].split('/')[1] || 'jpg'
     const buffer = Buffer.from(match[2], 'base64')
     const name = `${Date.now()}-${filename || 'upload'}.${ext}`.replace(/[^a-zA-Z0-9._-]/g, '')
-    const filepath = path.join(uploadsDir, name)
+    
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'civicpulse',
+          public_id: name.replace(/\.[^/.]+$/, ''),
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error) reject(error)
+          else resolve(result)
+        }
+      )
+      uploadStream.end(buffer)
+    })
 
-    fs.writeFileSync(filepath, buffer)
-
-    const baseUrl = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 5000}`
-    const url = `${baseUrl}/uploads/${name}`
+    const url = result.secure_url
 
     await Upload.create({
       filename: name,
@@ -88,6 +101,7 @@ router.post('/image', authRequired, async (req, res) => {
 
     res.json({ url, type: 'image', filename: name })
   } catch (err) {
+    console.error('Upload error:', err)
     res.status(500).json({ error: err.message })
   }
 })
@@ -115,12 +129,24 @@ router.post('/media', authRequired, async (req, res) => {
     const ext = mimeType.split('/')[1] || (isVideo ? 'mp4' : 'jpg')
     const buffer = Buffer.from(match[2], 'base64')
     const name = `${Date.now()}-${filename || 'upload'}.${ext}`.replace(/[^a-zA-Z0-9._-]/g, '')
-    const filepath = path.join(uploadsDir, name)
+    
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'civicpulse',
+          public_id: name.replace(/\.[^/.]+$/, ''),
+          resource_type: isVideo ? 'video' : 'image',
+        },
+        (error, result) => {
+          if (error) reject(error)
+          else resolve(result)
+        }
+      )
+      uploadStream.end(buffer)
+    })
 
-    fs.writeFileSync(filepath, buffer)
-
-    const baseUrl = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 5000}`
-    const url = `${baseUrl}/uploads/${name}`
+    const url = result.secure_url
 
     await Upload.create({
       filename: name,
@@ -132,6 +158,7 @@ router.post('/media', authRequired, async (req, res) => {
 
     res.json({ url, type: isVideo ? 'video' : 'image', filename: name })
   } catch (err) {
+    console.error('Upload error:', err)
     res.status(500).json({ error: err.message })
   }
 })

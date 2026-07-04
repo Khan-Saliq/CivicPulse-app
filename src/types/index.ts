@@ -42,6 +42,7 @@ export interface Issue {
   severity: number
   status: IssueStatus
   location: Location
+  area?: string
   imageUrl?: string
   reporterId: string
   reporterName: string

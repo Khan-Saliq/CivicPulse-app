@@ -41,6 +41,7 @@ const issueSchema = new mongoose.Schema(
       type: { type: String, enum: ['Point'], default: 'Point' },
       coordinates: { type: [Number], required: true },
     },
+    area: { type: String, default: 'Unknown Area' },
     imageUrl: String,
     reporterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     reporterName: { type: String, required: true },
