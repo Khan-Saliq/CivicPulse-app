@@ -1,4 +1,4 @@
-import { apiFetch } from './api'
+import { apiFetch, fixImageUrl } from './api'
 import type { Issue, IssueCategory, IssueStatus, ValidationResult } from '../types'
 
 export async function exportIssues(filters: Record<string, any>): Promise<Blob> {
@@ -21,19 +21,34 @@ export async function exportIssues(filters: Record<string, any>): Promise<Blob> 
 
 export async function getAllIssues(params?: Record<string, string>): Promise<Issue[]> {
   const qs = params ? '?' + new URLSearchParams(params).toString() : ''
-  return apiFetch<Issue[]>(`/issues${qs}`)
+  const issues = await apiFetch<Issue[]>(`/issues${qs}`)
+  // Fix image URLs for all issues
+  return issues.map(issue => ({
+    ...issue,
+    imageUrl: issue.imageUrl ? fixImageUrl(issue.imageUrl) : undefined
+  }))
 }
 
 export async function getIssueById(id: string): Promise<Issue | undefined> {
   try {
-    return await apiFetch<Issue>(`/issues/${id}`)
+    const issue = await apiFetch<Issue>(`/issues/${id}`)
+    // Fix image URL
+    if (issue.imageUrl) {
+      issue.imageUrl = fixImageUrl(issue.imageUrl)
+    }
+    return issue
   } catch {
     return undefined
   }
 }
 
 export async function getIssuesByReporter(reporterId: string): Promise<Issue[]> {
-  return apiFetch<Issue[]>(`/issues/reporter/${reporterId}`)
+  const issues = await apiFetch<Issue[]>(`/issues/reporter/${reporterId}`)
+  // Fix image URLs
+  return issues.map(issue => ({
+    ...issue,
+    imageUrl: issue.imageUrl ? fixImageUrl(issue.imageUrl) : undefined
+  }))
 }
 
 export async function getReporterStats(reporterId: string) {
@@ -51,9 +66,14 @@ export async function getNearbyIssues(
   radiusKm = 5,
   excludeResolved = true
 ): Promise<Issue[]> {
-  return apiFetch<Issue[]>(
+  const issues = await apiFetch<Issue[]>(
     `/issues/nearby?lat=${lat}&lng=${lng}&radius=${radiusKm}&excludeResolved=${excludeResolved}`
   )
+  // Fix image URLs
+  return issues.map(issue => ({
+    ...issue,
+    imageUrl: issue.imageUrl ? fixImageUrl(issue.imageUrl) : undefined
+  }))
 }
 
 export async function getPriorityTop(lat?: number, lng?: number, limit = 3): Promise<Issue[]> {
@@ -62,7 +82,12 @@ export async function getPriorityTop(lat?: number, lng?: number, limit = 3): Pro
     params.set('lat', String(lat))
     params.set('lng', String(lng))
   }
-  return apiFetch<Issue[]>(`/issues/priority/top?${params}`)
+  const issues = await apiFetch<Issue[]>(`/issues/priority/top?${params}`)
+  // Fix image URLs
+  return issues.map(issue => ({
+    ...issue,
+    imageUrl: issue.imageUrl ? fixImageUrl(issue.imageUrl) : undefined
+  }))
 }
 
 export async function getClusters(category?: string) {
@@ -84,9 +109,14 @@ export async function findDuplicateCandidates(
   lat: number,
   lng: number
 ): Promise<Issue[]> {
-  return apiFetch<Issue[]>(
+  const issues = await apiFetch<Issue[]>(
     `/issues/duplicates?title=${encodeURIComponent(title)}&lat=${lat}&lng=${lng}`
   )
+  // Fix image URLs
+  return issues.map(issue => ({
+    ...issue,
+    imageUrl: issue.imageUrl ? fixImageUrl(issue.imageUrl) : undefined
+  }))
 }
 
 export async function createIssue(data: {
@@ -98,10 +128,15 @@ export async function createIssue(data: {
   imageUrl?: string
   mergeWithId?: string
 }): Promise<Issue> {
-  return apiFetch<Issue>('/issues', {
+  const issue = await apiFetch<Issue>('/issues', {
     method: 'POST',
     body: JSON.stringify(data),
   })
+  // Fix image URL
+  if (issue.imageUrl) {
+    issue.imageUrl = fixImageUrl(issue.imageUrl)
+  }
+  return issue
 }
 
 export async function voteIssue(id: string): Promise<Issue> {
