@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, User, MapPin } from 'lucide-react'
 import { Layout } from '../../components/layout/Layout'
@@ -11,6 +11,7 @@ import { useConfig } from '../../context/ConfigContext'
 import { fixImageUrl } from '../../services/api'
 import { useIssues } from '../../context/IssueContext'
 import { useAuth } from '../../context/AuthContext'
+import { getFormattedArea } from '../../utils/geocoding'
 import type { IssueStatus, ValidationResult } from '../../types'
 
 export function AdminIssueDetail() {
@@ -20,7 +21,17 @@ export function AdminIssueDetail() {
   const { user, refreshSession } = useAuth()
   const { issues, updateStatus, validateIssue } = useIssues()
   const [downloading, setDownloading] = useState(false)
+  const [areaName, setAreaName] = useState<string>('')
   const issue = issues.find((i) => i.id === id)
+
+  // Fetch area name from coordinates when issue loads
+  useEffect(() => {
+    if (issue?.location?.lat && issue?.location?.lng) {
+      getFormattedArea(issue.location.lat, issue.location.lng).then(area => {
+        setAreaName(area)
+      })
+    }
+  }, [issue])
 
   if (user?.role === 'department_admin' && issue && issue.responsibleDepartment !== user.department) {
     return (
@@ -108,7 +119,14 @@ export function AdminIssueDetail() {
                 </div>
               )}
               <div className="mt-4 text-sm text-slate-500 space-y-2">
-                {issue.area && (
+                {areaName && (
+                  <p className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-cyan-400" />
+                    <span className="font-medium text-slate-300">Area:</span>
+                    <span className="text-cyan-300">{areaName}</span>
+                  </p>
+                )}
+                {issue.area && !areaName && (
                   <p className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-cyan-400" />
                     <span className="font-medium text-slate-300">Area:</span>
