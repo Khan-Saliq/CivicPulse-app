@@ -17,6 +17,7 @@ import chatRoutes from './routes/chat.js'
 import uploadRoutes from './routes/uploads.js'
 import notificationRoutes from './routes/notifications.js'
 import userNotificationRoutes from './routes/userNotifications.js'
+import adminRoutes from './routes/admin.js'
 import { initializeCleanupJobs } from './utils/cleanup.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -76,6 +77,7 @@ app.use('/api/uploads', uploadRoutes)
 app.use('/api/issues', issueRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/user-notifications', userNotificationRoutes)
+app.use('/api/admin', adminRoutes)
 
 async function start() {
   try {
