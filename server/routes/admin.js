@@ -1,12 +1,12 @@
 import express from 'express'
 import mongoose from 'mongoose'
 import Issue from '../models/Issue.js'
-import { authenticate, requireRole } from '../middleware/auth.js'
+import { authRequired, requireAdmin } from '../middleware/auth.js'
 
 const router = express.Router()
 
 // Admin endpoint to fix all localhost image URLs
-router.post('/fix-image-urls', authenticate, requireRole('admin'), async (req, res) => {
+router.post('/fix-image-urls', authRequired, requireAdmin, async (req, res) => {
   try {
     console.log('🔧 Starting image URL fix...')
     
