@@ -1,6 +1,6 @@
 import express from 'express'
 import mongoose from 'mongoose'
-import { Issue } from '../models/Issue.js'
+import Issue from '../models/Issue.js'
 import { authenticate, requireRole } from '../middleware/auth.js'
 
 const router = express.Router()
